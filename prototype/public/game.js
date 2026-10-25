@@ -221,47 +221,233 @@ const marineSnow = new THREE.Points(pGeo, new THREE.PointsMaterial({
 }));
 scene.add(marineSnow);
 
-// --- High-Fidelity 3D Diver Model Generator ---
+// --- Heavy Atmospheric Diving Suit (ADS - JIM/Bathysphere Rig) Generator ---
 function createDiver(colorHex = 0x00d4ff) {
     const group = new THREE.Group();
 
-    // Heavy Armored Torso (High contrast, clearly visible)
-    const torsoMat = new THREE.MeshStandardMaterial({ color: 0x2e4254, roughness: 0.4, metalness: 0.7 });
-    const torso = new THREE.Mesh(new THREE.BoxGeometry(0.85, 1.1, 0.55), torsoMat);
-    torso.position.y = 1.0;
-    torso.castShadow = true;
-    group.add(torso);
+    // Materials: Heavy cast iron, oxidized brass, industrial rubber, and warm incandescent glass
+    const ironHullMat = new THREE.MeshStandardMaterial({
+        color: 0x222d38,
+        roughness: 0.55,
+        metalness: 0.8
+    });
 
-    // Life-Support Oxygen Rig on Back
-    const rigMat = new THREE.MeshStandardMaterial({ color: colorHex, metalness: 0.8, roughness: 0.2 });
-    const tankL = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.9, 12), rigMat);
-    tankL.position.set(-0.22, 1.05, -0.42);
+    const brassPlateMat = new THREE.MeshStandardMaterial({
+        color: 0xc8963e,
+        roughness: 0.35,
+        metalness: 0.85
+    });
+
+    const rubberJointMat = new THREE.MeshStandardMaterial({
+        color: 0x11161d,
+        roughness: 0.9,
+        metalness: 0.2
+    });
+
+    const leadBootMat = new THREE.MeshStandardMaterial({
+        color: 0x181e26,
+        roughness: 0.7,
+        metalness: 0.9
+    });
+
+    const hazardStripeMat = new THREE.MeshStandardMaterial({
+        map: hazardTex,
+        roughness: 0.4
+    });
+
+    // 1. Heavy Barrel Pressure Hull (Torso)
+    const torsoGroup = new THREE.Group();
+    const hullGeo = new THREE.CylinderGeometry(0.52, 0.46, 1.05, 18);
+    const hull = new THREE.Mesh(hullGeo, ironHullMat);
+    hull.position.y = 1.05;
+    hull.castShadow = true;
+    torsoGroup.add(hull);
+
+    // Bolted Flange Rings (Reinforced Pressure Ribs)
+    const ribGeo = new THREE.TorusGeometry(0.52, 0.04, 8, 20);
+    const rib1 = new THREE.Mesh(ribGeo, brassPlateMat);
+    rib1.rotation.x = Math.PI / 2;
+    rib1.position.set(0, 1.4, 0);
+    const rib2 = rib1.clone();
+    rib2.position.set(0, 0.7, 0);
+    torsoGroup.add(rib1, rib2);
+
+    // Chest Hazard Panel & Stencil Plate
+    const chestPlate = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.35, 0.12), hazardStripeMat);
+    chestPlate.position.set(0, 1.12, 0.48);
+    torsoGroup.add(chestPlate);
+
+    // Analog Pressure Dial on Chest
+    const dialHousing = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.08, 16), brassPlateMat);
+    dialHousing.rotation.x = Math.PI / 2;
+    dialHousing.position.set(0, 1.12, 0.56);
+    const dialFace = new THREE.Mesh(new THREE.CircleGeometry(0.09, 16), new THREE.MeshBasicMaterial({ color: 0xfaebd7 }));
+    dialFace.position.set(0, 1.12, 0.61);
+    const needle = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.07, 0.01), new THREE.MeshBasicMaterial({ color: 0xcc2200 }));
+    needle.position.set(0.02, 1.12, 0.62);
+    needle.rotation.z = -0.6;
+    torsoGroup.add(dialHousing, dialFace, needle);
+
+    group.add(torsoGroup);
+
+    // 2. Heavy Bolted Dome Helmet (Atmospheric Bathysphere Style)
+    const helmetGroup = new THREE.Group();
+    helmetGroup.position.set(0, 1.82, 0);
+
+    // Dome Cast
+    const dome = new THREE.Mesh(new THREE.SphereGeometry(0.42, 20, 16), ironHullMat);
+    helmetGroup.add(dome);
+
+    // Bolted Neck Collar Ring
+    const collar = new THREE.Mesh(new THREE.TorusGeometry(0.43, 0.06, 8, 20), brassPlateMat);
+    collar.rotation.x = Math.PI / 2;
+    collar.position.y = -0.32;
+    helmetGroup.add(collar);
+
+    // Overhead Heavy Lifting Shackle / Eye Bolt
+    const shackle = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.035, 8, 16), ironHullMat);
+    shackle.position.set(0, 0.48, 0);
+    helmetGroup.add(shackle);
+
+    // Central Circular Porthole Housing (Heavy Brass Bezel)
+    const portholeRim = new THREE.Mesh(new THREE.TorusGeometry(0.22, 0.05, 8, 24), brassPlateMat);
+    portholeRim.position.set(0, 0, 0.38);
+    helmetGroup.add(portholeRim);
+
+    // Glowing Pressure Glass Window
+    const glassMat = new THREE.MeshBasicMaterial({ color: colorHex });
+    const glassWindow = new THREE.Mesh(new THREE.CircleGeometry(0.18, 20), glassMat);
+    glassWindow.position.set(0, 0, 0.40);
+    helmetGroup.add(glassWindow);
+
+    // Steel Protective Cross-Grill / Cage Bars over glass
+    const barMat = new THREE.MeshStandardMaterial({ color: 0x111a24, metalness: 0.9 });
+    const barH = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.38), barMat);
+    barH.rotation.z = Math.PI / 2;
+    barH.position.set(0, 0, 0.42);
+    const barV = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.38), barMat);
+    barV.position.set(0, 0, 0.42);
+    helmetGroup.add(barH, barV);
+
+    // Two Angled Side Inspection Ports
+    const sidePortGeo = new THREE.TorusGeometry(0.1, 0.03, 8, 16);
+    const sidePortL = new THREE.Mesh(sidePortGeo, brassPlateMat);
+    sidePortL.position.set(-0.35, 0.05, 0.2);
+    sidePortL.rotation.y = -Math.PI / 3;
+    const sidePortR = new THREE.Mesh(sidePortGeo, brassPlateMat);
+    sidePortR.position.set(0.35, 0.05, 0.2);
+    sidePortR.rotation.y = Math.PI / 3;
+    helmetGroup.add(sidePortL, sidePortR);
+
+    // Shoulder-Mounted Work Floodlight
+    const floodlightHousing = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.16, 0.3, 16), ironHullMat);
+    floodlightHousing.rotation.x = Math.PI / 2;
+    floodlightHousing.position.set(0.48, 0.2, 0.1);
+    const floodlightLens = new THREE.Mesh(new THREE.CircleGeometry(0.14, 16), new THREE.MeshBasicMaterial({ color: 0xffeedd }));
+    floodlightLens.position.set(0.48, 0.2, 0.26);
+    helmetGroup.add(floodlightHousing, floodlightLens);
+
+    group.add(helmetGroup);
+
+    // 3. Spherical Ball-and-Socket Shoulder Joints & Heavy Arms
+    for (let side of [-1, 1]) {
+        // Rotary Spherical Shoulder
+        const shoulder = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 16), brassPlateMat);
+        shoulder.position.set(side * 0.62, 1.35, 0);
+        group.add(shoulder);
+
+        // Bicep Pressure Sleeve
+        const bicep = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.16, 0.45, 14), ironHullMat);
+        bicep.position.set(side * 0.66, 1.05, 0.05);
+        group.add(bicep);
+
+        // Elbow Rotary Joint
+        const elbow = new THREE.Mesh(new THREE.SphereGeometry(0.16, 14, 14), rubberJointMat);
+        elbow.position.set(side * 0.68, 0.78, 0.08);
+        group.add(elbow);
+
+        // Forearm with Pressure Reinforcement
+        const forearm = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.16, 0.42, 14), ironHullMat);
+        forearm.position.set(side * 0.70, 0.52, 0.18);
+        forearm.rotation.x = 0.3;
+        group.add(forearm);
+
+        // Heavy Industrial 3-Prong Manipulator Claw
+        const wrist = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.14, 0.12, 12), brassPlateMat);
+        wrist.position.set(side * 0.70, 0.28, 0.26);
+        group.add(wrist);
+
+        const clawBase = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.15, 0.15), ironHullMat);
+        clawBase.position.set(side * 0.70, 0.18, 0.28);
+        group.add(clawBase);
+    }
+
+    // 4. Heavy Segmented Legs & Weighted Iron Diving Boots
+    for (let side of [-1, 1]) {
+        // Hip Rotary Joint
+        const hip = new THREE.Mesh(new THREE.SphereGeometry(0.2, 14, 14), rubberJointMat);
+        hip.position.set(side * 0.28, 0.65, 0);
+        group.add(hip);
+
+        // Thigh
+        const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.17, 0.48, 14), ironHullMat);
+        thigh.position.set(side * 0.28, 0.42, 0);
+        group.add(thigh);
+
+        // Knee Joint
+        const knee = new THREE.Mesh(new THREE.SphereGeometry(0.18, 14, 14), brassPlateMat);
+        knee.position.set(side * 0.28, 0.22, 0.02);
+        group.add(knee);
+
+        // Weighted Lead Boot (Massive, heavy, industrial)
+        const bootGroup = new THREE.Group();
+        bootGroup.position.set(side * 0.28, 0, 0.08);
+
+        // Sole Plate with Heavy Tread
+        const sole = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.14, 0.68), leadBootMat);
+        sole.position.y = 0.07;
+        sole.castShadow = true;
+
+        // Armored Foot Shroud
+        const shroud = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.28, 0.48), ironHullMat);
+        shroud.position.set(0, 0.22, 0.04);
+
+        // Brass Toe Cap Clamp
+        const toeClamp = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.12, 0.16), brassPlateMat);
+        toeClamp.position.set(0, 0.12, 0.32);
+
+        bootGroup.add(sole, shroud, toeClamp);
+        group.add(bootGroup);
+    }
+
+    // 5. Backpack Umbilical & Oxygen Rebreather Rig
+    const rigGroup = new THREE.Group();
+    rigGroup.position.set(0, 1.15, -0.45);
+
+    // Dual Twin Scrubbers (Heavy cylinders with brass caps)
+    const tankGeo = new THREE.CylinderGeometry(0.16, 0.16, 0.95, 16);
+    const tankL = new THREE.Mesh(tankGeo, ironHullMat);
+    tankL.position.set(-0.24, 0, 0);
     const tankR = tankL.clone();
-    tankR.position.x = 0.22;
-    group.add(tankL, tankR);
+    tankR.position.x = 0.24;
 
-    // Helmet with Vivid Visor Glow
-    const helmetMat = new THREE.MeshStandardMaterial({ color: 0x4a6278, metalness: 0.8, roughness: 0.3 });
-    const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.36, 16, 16), helmetMat);
-    helmet.position.set(0, 1.75, 0.05);
+    const capGeo = new THREE.CylinderGeometry(0.17, 0.17, 0.1, 16);
+    const capL = new THREE.Mesh(capGeo, brassPlateMat);
+    capL.position.set(-0.24, 0.5, 0);
+    const capR = capL.clone();
+    capR.position.x = 0.24;
 
-    const visorMat = new THREE.MeshBasicMaterial({ color: colorHex });
-    const visor = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.22, 0.15), visorMat);
-    visor.position.set(0, 1.76, 0.32);
-    group.add(helmet, visor);
+    // Cross-Manifold Pressure Pipe bridging tanks
+    const manifold = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.55), brassPlateMat);
+    manifold.rotation.z = Math.PI / 2;
+    manifold.position.set(0, 0.42, 0);
 
-    // Heavy Boots
-    const bootMat = new THREE.MeshStandardMaterial({ color: 0x182430, roughness: 0.9 });
-    const bootL = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.45, 0.45), bootMat);
-    bootL.position.set(-0.26, 0.22, 0);
-    const bootR = bootL.clone();
-    bootR.position.x = 0.26;
-    group.add(bootL, bootR);
+    // Heavy Umbilical Tether Carabiner Anchor Ring
+    const tetherHarness = new THREE.Mesh(new THREE.TorusGeometry(0.16, 0.05, 12, 24), brassPlateMat);
+    tetherHarness.position.set(0, 0.1, -0.22);
 
-    // Cable Mount Carabiner Hook
-    const hook = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.04, 8, 16), new THREE.MeshStandardMaterial({ color: 0xffcc00, metalness: 0.9 }));
-    hook.position.set(0, 1.15, -0.6);
-    group.add(hook);
+    rigGroup.add(tankL, tankR, capL, capR, manifold, tetherHarness);
+    group.add(rigGroup);
 
     return group;
 }
@@ -581,7 +767,7 @@ function animate() {
         }
     }
 
-    localPlayerMesh.rotation.y = playerYaw;
+    localPlayerMesh.rotation.y = playerYaw + Math.PI;
 
     // Headlamp Position
     headlamp.position.copy(localPlayerMesh.position).add(new THREE.Vector3(0, 1.7, 0));
